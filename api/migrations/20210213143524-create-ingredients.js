@@ -14,10 +14,13 @@ module.exports = {
       unit: {
         type: Sequelize.STRING
       },
-      coutable: {
+      isCountable: {
         type: Sequelize.BOOLEAN
       },
       price: {
+        type: Sequelize.DOUBLE
+      },
+      quantity: {
         type: Sequelize.DOUBLE
       },
       createdAt: {
