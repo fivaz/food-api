@@ -5,22 +5,22 @@ module.exports = {
         await queryInterface.bulkInsert('MealIngredients', [
             {
                 quantity: null,
-                meal_id: 1,
-                ingredient_id: 1,
+                mealId: 1,
+                ingredientId: 1,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
             {
                 quantity: 200,
-                meal_id: 1,
-                ingredient_id: 2,
+                mealId: 1,
+                ingredientId: 2,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
             {
                 quantity: 200,
-                meal_id: 1,
-                ingredient_id: 7,
+                mealId: 1,
+                ingredientId: 7,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },

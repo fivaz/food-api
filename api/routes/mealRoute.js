@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/meals', MealController.getAll);
 router.get('/meals/:id', MealController.get);
+router.get('/meals/:id/ingredients', MealController.getIngredients);
 router.post('/meals', MealController.create);
 router.put('/meals/:id', MealController.update);
 router.delete('/meals/:id', MealController.delete);

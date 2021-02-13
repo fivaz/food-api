@@ -11,12 +11,12 @@ module.exports = {
             quantity: {
                 type: Sequelize.DOUBLE
             },
-            meal_id: {
+            mealId: {
                 allowNull: false,
                 type: Sequelize.INTEGER,
                 references: {model: 'Meals', key: 'id'}
             },
-            ingredient_id: {
+            ingredientId: {
                 allowNull: false,
                 type: Sequelize.INTEGER,
                 references: {model: 'Ingredients', key: 'id'}
@@ -31,7 +31,7 @@ module.exports = {
             }
         });
     },
-    down: async (queryInterface, Sequelize) => {
+    down: async (queryInterface) => {
         await queryInterface.dropTable('MealIngredients');
     }
 };
