@@ -8,7 +8,8 @@
     "start": "nodemon index.js",
     "seed": "npx sequelize-cli db:seed:all",
     "undo-seed": "npx sequelize-cli db:seed:undo:all",
-    "refresh-db": "npx sequelize-cli db:seed:undo:all && npx sequelize-cli db:seed:all"
+    "refresh-data": "npx sequelize-cli db:seed:undo:all && npx sequelize-cli db:seed:all",
+    "refresh-db": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate"
   },
   "keywords": [],
   "author": "",
