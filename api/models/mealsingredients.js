@@ -1,9 +1,6 @@
 'use strict';
 const {Model} = require('sequelize');
 
-// const Meals = sequelize.define('Meals', { name: DataTypes.STRING });
-// const Ingredients = sequelize.define('Ingredients', { name: DataTypes.STRING });
-
 module.exports = (sequelize, DataTypes) => {
     class MealIngredients extends Model {
         /**

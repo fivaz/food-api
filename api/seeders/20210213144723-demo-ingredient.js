@@ -1,18 +1,10 @@
 'use strict';
 
 module.exports = {
-    up: async (queryInterface, Sequelize) => {
-        /**
-         * Add seed commands here.
-         *
-         * Example:
-         * await queryInterface.bulkInsert('People', [{
-         *   name: 'John Doe',
-         *   isBetaMember: false
-         * }], {});
-         */
+    up: async (queryInterface) => {
         await queryInterface.bulkInsert('Ingredients', [
             {
+                id: 1,
                 name: 'Salt',
                 isCountable: false,
                 price: null,
@@ -22,6 +14,7 @@ module.exports = {
                 updatedAt: new Date(),
             },
             {
+                id: 2,
                 name: 'Rice',
                 isCountable: true,
                 price: 9.95,
@@ -31,6 +24,7 @@ module.exports = {
                 updatedAt: new Date(),
             },
             {
+                id: 3,
                 name: 'Grilled Chicken BBQ',
                 isCountable: true,
                 price: 4.3,
@@ -40,6 +34,7 @@ module.exports = {
                 updatedAt: new Date(),
             },
             {
+                id: 4,
                 name: 'Bread',
                 isCountable: true,
                 price: 1.75,
@@ -49,6 +44,7 @@ module.exports = {
                 updatedAt: new Date(),
             },
             {
+                id: 5,
                 name: 'Madeleine?',
                 isCountable: true,
                 price: 2.55,
@@ -58,6 +54,7 @@ module.exports = {
                 updatedAt: new Date(),
             },
             {
+                id: 6,
                 name: 'Milk?',
                 isCountable: true,
                 price: 1.55,
@@ -65,17 +62,21 @@ module.exports = {
                 quantity: 1.5,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            }
+            },
+            {
+                id: 7,
+                name: 'Chicken Chest',
+                isCountable: true,
+                price: 15,
+                unit: 'g',
+                quantity: 1000,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
         ], {});
     },
 
-    down: async (queryInterface, Sequelize) => {
-        /**
-         * Add commands to revert seed here.
-         *
-         * Example:
-         * await queryInterface.bulkDelete('People', null, {});
-         */
+    down: async (queryInterface) => {
         await queryInterface.bulkDelete('Ingredients', {}, {});
     }
 };
