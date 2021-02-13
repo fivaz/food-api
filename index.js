@@ -1,5 +1,8 @@
-const customExpress = require('./config/customExpress')
-const app = customExpress()
+const express = require('express');
+const app = express();
+const routes = require('./api/routes');
+
+routes(app);
 
 const port = process.env.PORT || 3000;
 
