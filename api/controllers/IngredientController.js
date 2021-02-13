@@ -23,8 +23,20 @@ class IngredientController {
     static async create(req, res) {
         const ingredient = req.body;
         try {
-            const newElement = await database.Ingredients.create(ingredient);
-            return res.status(200).json(newElement);
+            const createdIngredient = await database.Ingredients.create(ingredient);
+            return res.status(200).json(createdIngredient);
+        } catch (error) {
+            return res.status(500).json(error.message);
+        }
+    }
+
+    static async update(req, res) {
+        const id = Number(req.params.id);
+        const newData = req.body;
+        try {
+            await database.Ingredients.update(newData, {where: {id}});
+            const updatedIngredient = await database.Ingredients.findOne({where: {id}});
+            return res.status(200).json(updatedIngredient);
         } catch (error) {
             return res.status(500).json(error.message);
         }
