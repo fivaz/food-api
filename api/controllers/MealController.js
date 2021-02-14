@@ -1,6 +1,7 @@
 const database = require('../models');
 
 class MealController {
+
     static async getAll(req, res) {
         try {
             const all = await database.Meals.findAll();
@@ -34,7 +35,7 @@ class MealController {
         const Meal = req.body;
         try {
             const createdMeal = await database.Meals.create(Meal);
-            const records = req.body.ingredients.map(row => {
+            const records = Meal.ingredients.map(row => {
                 row.mealId = createdMeal.id;
                 return row;
             });
@@ -50,6 +51,13 @@ class MealController {
         const newData = req.body;
         try {
             await database.Meals.update(newData, {where: {id}});
+            const records = newData.ingredients.map(row => {
+                row.mealId = id;
+                return row;
+            });
+            //check afterBulkDestroy as an option
+            await database.MealIngredients.destroy({where: {mealId: id}});
+            await database.MealIngredients.bulkCreate(records);
             const updatedMeal = await database.Meals.findOne({where: {id}});
             return res.status(200).json(updatedMeal);
         } catch (error) {
