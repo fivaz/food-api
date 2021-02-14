@@ -50,16 +50,18 @@ class MealController {
         const id = Number(req.params.id);
         const newData = req.body;
         try {
-            await database.Meals.update(newData, {where: {id}});
             const records = newData.ingredients.map(row => {
                 row.mealId = id;
                 return row;
             });
             //check afterBulkDestroy as an option
-            await database.MealIngredients.destroy({where: {mealId: id}});
-            await database.MealIngredients.bulkCreate(records);
-            const updatedMeal = await database.Meals.findOne({where: {id}});
-            return res.status(200).json(updatedMeal);
+            const result = await Promise.all([
+                database.Meals.update(newData, {where: {id}}),
+                database.MealIngredients.destroy({where: {mealId: id}}),
+                database.MealIngredients.bulkCreate(records),
+                database.Meals.findOne({where: {id}})
+            ]);
+            return res.status(200).json(result[3]);
         } catch (error) {
             return res.status(500).json(error.message);
         }
