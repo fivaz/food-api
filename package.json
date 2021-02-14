@@ -6,8 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js",
-    "seed": "npx sequelize-cli db:seed:all",
-    "undo-seed": "npx sequelize-cli db:seed:undo:all",
     "refresh-data": "npx sequelize-cli db:seed:undo:all && npx sequelize-cli db:seed:all",
     "refresh-db": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate"
   },
@@ -17,6 +15,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "consign": "^0.1.6",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
     "path": "^0.12.7",
