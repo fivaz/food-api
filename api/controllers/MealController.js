@@ -23,7 +23,7 @@ class MealController {
     static async getIngredients(req, res) {
         const {id} = req.params;
         try {
-            const element = await database.Meals.findOne({where: {id: Number(id)},include:database.Ingredients});
+            const element = await database.Meals.findOne({where: {id: Number(id)}, include: database.Ingredients});
             return res.status(200).json(element.Ingredients);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -34,7 +34,11 @@ class MealController {
         const Meal = req.body;
         try {
             const createdMeal = await database.Meals.create(Meal);
-            // database.MealIngredient
+            const records = req.body.ingredients.map(row => {
+                row.mealId = createdMeal.id;
+                return row;
+            });
+            await database.MealIngredients.bulkCreate(records);
             return res.status(201).json(createdMeal);
         } catch (error) {
             return res.status(500).json(error.message);
