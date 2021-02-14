@@ -66,9 +66,12 @@ class MealController {
     }
 
     static async delete(req, res) {
-        const {id} = req.params;
+        const id = Number(req.params.id);
         try {
-            await database.Meals.destroy({where: {id: Number(id)}});
+            await Promise.all([
+                database.MealIngredients.destroy({where: {mealId: id}}),
+                database.Meals.destroy({where: {id}})
+            ]);
             return res.status(200).json(`row ${id} deleted`);
         } catch (error) {
             return res.status(500).json(error.message);
