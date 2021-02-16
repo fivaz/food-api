@@ -29,10 +29,8 @@ class MealController {
         const meal = req.body;
         try {
             let createdMeal = await database.meals.create(meal);
-            if (meal.ingredients) {
-                await MealController.createChildren(meal, createdMeal.id);
-                createdMeal = await MealController.findOneFull(createdMeal.id);
-            }
+            if (meal.ingredients)
+                [, createdMeal] = await MealController.createChildren(meal, createdMeal.id);
             return res.status(201).json(createdMeal);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -55,7 +53,8 @@ class MealController {
 
     static async createChildren(meal, id) {
         const records = MealController.getMealIngredients(meal, id);
-        return database.mealIngredients.bulkCreate(records);
+        await database.mealIngredients.bulkCreate(records);
+        return MealController.findOneFull(id);
     }
 
     static getMealIngredients(meal, id) {
@@ -72,10 +71,8 @@ class MealController {
         try {
             await database.meals.update(newData, {where: {id}});
             let result = await database.meals.findOne({where: {id}});
-            if (newData.ingredients) {
-                await MealController.updateChildren(newData, id);
-                result = await MealController.findOneFull(id);
-            }
+            if (newData.ingredients)
+                result = await MealController.updateChildren(newData, id);
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -85,10 +82,9 @@ class MealController {
     static async updateChildren(newData, id) {
         const records = MealController.getMealIngredients(newData, id);
         //TODO check afterBulkDestroy as an option
-        return Promise.all([
-            database.mealIngredients.destroy({where: {mealId: id}}),
-            database.mealIngredients.bulkCreate(records)
-        ]);
+        await database.mealIngredients.destroy({where: {mealId: id}})
+        await database.mealIngredients.bulkCreate(records)
+        return MealController.findOneFull(id);
     }
 
     static async delete(req, res) {
