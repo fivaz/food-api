@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         category: DataTypes.ENUM('breakfast', 'brunch', 'lunch', 'tea', 'supper', 'dinner')
     }, {
         sequelize,
-        modelName: 'Meals',
+        modelName: 'meals',
     });
     return Meals;
 };

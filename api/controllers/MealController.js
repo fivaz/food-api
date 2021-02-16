@@ -11,7 +11,7 @@ class MealController {
 
     static async getAllSimple(req, res) {
         try {
-            const all = await database.Meals.findAll();
+            const all = await database.meals.findAll();
             return res.status(200).json(all);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -20,7 +20,7 @@ class MealController {
 
     static async getAllFull(req, res) {
         try {
-            const all = await database.Meals.findAll({include: database.Ingredients});
+            const all = await database.meals.findAll({include: database.ingredients});
             return res.status(200).json(all);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -30,7 +30,7 @@ class MealController {
     static async get(req, res) {
         const {id} = req.params;
         try {
-            const element = await database.Meals.findOne({where: {id: Number(id)}});
+            const element = await database.meals.findOne({where: {id: Number(id)}});
             return res.status(200).json(element);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -40,8 +40,8 @@ class MealController {
     static async getIngredients(req, res) {
         const {id} = req.params;
         try {
-            const element = await database.Meals.findOne({where: {id: Number(id)}, include: database.Ingredients});
-            return res.status(200).json(element.Ingredients);
+            const element = await database.meals.findOne({where: {id: Number(id)}, include: database.ingredients});
+            return res.status(200).json(element.ingredients);
         } catch (error) {
             return res.status(500).json(error.message);
         }
@@ -50,14 +50,14 @@ class MealController {
     static async create(req, res) {
         const Meal = req.body;
         try {
-            const createdMeal = await database.Meals.create(Meal);
+            const createdMeal = await database.meals.create(Meal);
             if (Meal.ingredients) {
                 const records = Meal.ingredients.map(row => {
                     row.mealId = createdMeal.id;
                     row.ingredientId = row.id;
                     return row;
                 });
-                await database.MealIngredients.bulkCreate(records);
+                await database.mealingredients.bulkCreate(records);
             }
             return res.status(201).json(createdMeal);
         } catch (error) {
@@ -70,8 +70,8 @@ class MealController {
         const id = Number(req.params.id);
         const newData = req.body;
         try {
-            await database.Meals.update(newData, {where: {id}});
-            const result = await database.Meals.findOne({where: {id}});
+            await database.meals.update(newData, {where: {id}});
+            const result = await database.meals.findOne({where: {id}});
 
             if (newData.ingredients)
                 await MealController.updateChildren(newData, id);
@@ -89,8 +89,8 @@ class MealController {
         });
         //TODO check afterBulkDestroy as an option
         await Promise.all([
-            database.MealIngredients.destroy({where: {mealId: id}}),
-            database.MealIngredients.bulkCreate(records)
+            database.mealingredients.destroy({where: {mealId: id}}),
+            database.mealingredients.bulkCreate(records)
         ]);
     }
 
@@ -98,8 +98,8 @@ class MealController {
         const id = Number(req.params.id);
         try {
             await Promise.all([
-                database.MealIngredients.destroy({where: {mealId: id}}),
-                database.Meals.destroy({where: {id}})
+                database.mealingredients.destroy({where: {mealId: id}}),
+                database.meals.destroy({where: {id}})
             ]);
             return res.status(200).json(`row ${id} deleted`);
         } catch (error) {

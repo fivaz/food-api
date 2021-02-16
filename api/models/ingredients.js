@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         quantity: DataTypes.DOUBLE,
     }, {
         sequelize,
-        modelName: 'Ingredients',
+        modelName: 'ingredients',
     });
     return Ingredients;
 };

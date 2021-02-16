@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            models.Ingredients.belongsToMany(models.Meals, {through: this,foreignKey:'ingredientId'})
-            models.Meals.belongsToMany(models.Ingredients, {through: this,foreignKey:'mealId'})
+            models.ingredients.belongsToMany(models.meals, {through: this,foreignKey:'ingredientId'})
+            models.meals.belongsToMany(models.ingredients, {through: this,foreignKey:'mealId'})
         }
     }
 
@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         quantity: DataTypes.DOUBLE
     }, {
         sequelize,
-        modelName: 'MealIngredients',
+        modelName: 'mealIngredients',
     });
     return MealIngredients;
 };

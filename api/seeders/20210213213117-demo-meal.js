@@ -12,7 +12,7 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
          */
-        await queryInterface.bulkInsert('Meals', [
+        await queryInterface.bulkInsert('meals', [
             {
                 id: 1,
                 name: 'Chicken Filet with Rice',
@@ -31,6 +31,6 @@ module.exports = {
          * down: async (queryInterface, Sequelize) => {
          *  await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete('Meals', {}, {});
+        await queryInterface.bulkDelete('meals', {}, {});
     }
 };
