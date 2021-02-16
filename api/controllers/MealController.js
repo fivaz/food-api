@@ -3,24 +3,9 @@ const database = require('../models');
 class MealController {
 
     static async getAll(req, res) {
-        if (req.query?.full)
-            return MealController.getAllFull(req, res);
-        else
-            return MealController.getAllSimple(req, res);
-    }
-
-    static async getAllSimple(req, res) {
         try {
-            const all = await database.meals.findAll();
-            return res.status(200).json(all);
-        } catch (error) {
-            return res.status(500).json(error.message);
-        }
-    }
-
-    static async getAllFull(req, res) {
-        try {
-            const all = await database.meals.findAll({include: database.ingredients});
+            const options = req.query?.full ? {include: database.ingredients} : {};
+            const all = await database.meals.findAll(options);
             return res.status(200).json(all);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -30,18 +15,11 @@ class MealController {
     static async get(req, res) {
         const {id} = req.params;
         try {
-            const element = await database.meals.findOne({where: {id: Number(id)}});
-            return res.status(200).json(element);
-        } catch (error) {
-            return res.status(500).json(error.message);
-        }
-    }
+            const element = req.query?.full ?
+                await MealController.findOneFull(id) :
+                await MealController.findOne(id)
 
-    static async getIngredients(req, res) {
-        const {id} = req.params;
-        try {
-            const element = await database.meals.findOne({where: {id: Number(id)}, include: database.ingredients});
-            return res.status(200).json(element.ingredients);
+            return res.status(200).json(element);
         } catch (error) {
             return res.status(500).json(error.message);
         }
@@ -50,18 +28,41 @@ class MealController {
     static async create(req, res) {
         const meal = req.body;
         try {
-            const createdMeal = await database.meals.create(meal);
+            let createdMeal = await database.meals.create(meal);
             if (meal.ingredients) {
-                const records = meal.ingredients.map(row => {
-                    row.mealIngredients.mealId = createdMeal.id;
-                    return row.mealIngredients;
-                });
-                await database.mealIngredients.bulkCreate(records);
+                await MealController.createChildren(meal, createdMeal.id);
+                createdMeal = await MealController.findOneFull(createdMeal.id);
             }
             return res.status(201).json(createdMeal);
         } catch (error) {
             return res.status(500).json(error.message);
         }
+    }
+
+    //TODO check if I can remove these Number(id)
+    static async findOne(id) {
+        return database.meals.findOne({
+            where: {id: Number(id)}
+        });
+    }
+
+    static async findOneFull(id) {
+        return database.meals.findOne({
+            where: {id: Number(id)},
+            include: database.ingredients
+        });
+    }
+
+    static async createChildren(meal, id) {
+        const records = MealController.getMealIngredients(meal, id);
+        return database.mealIngredients.bulkCreate(records);
+    }
+
+    static getMealIngredients(meal, id) {
+        return meal.ingredients.map(row => {
+            row.mealIngredients.mealId = id;
+            return row.mealIngredients;
+        });
     }
 
     //TODO try to do this better
@@ -70,10 +71,11 @@ class MealController {
         const newData = req.body;
         try {
             await database.meals.update(newData, {where: {id}});
-            const result = await database.meals.findOne({where: {id}});
-
-            if (newData.ingredients)
+            let result = await database.meals.findOne({where: {id}});
+            if (newData.ingredients) {
                 await MealController.updateChildren(newData, id);
+                result = await MealController.findOneFull(id);
+            }
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -81,12 +83,9 @@ class MealController {
     }
 
     static async updateChildren(newData, id) {
-        const records = newData.ingredients.map(row => {
-            row.mealIngredients.mealId = id;
-            return row.mealIngredients;
-        });
+        const records = MealController.getMealIngredients(newData, id);
         //TODO check afterBulkDestroy as an option
-        await Promise.all([
+        return Promise.all([
             database.mealIngredients.destroy({where: {mealId: id}}),
             database.mealIngredients.bulkCreate(records)
         ]);
