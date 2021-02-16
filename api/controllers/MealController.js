@@ -48,16 +48,15 @@ class MealController {
     }
 
     static async create(req, res) {
-        const Meal = req.body;
+        const meal = req.body;
         try {
-            const createdMeal = await database.meals.create(Meal);
-            if (Meal.ingredients) {
-                const records = Meal.ingredients.map(row => {
-                    row.mealId = createdMeal.id;
-                    row.ingredientId = row.id;
-                    return row;
+            const createdMeal = await database.meals.create(meal);
+            if (meal.ingredients) {
+                const records = meal.ingredients.map(row => {
+                    row.mealIngredients.mealId = createdMeal.id;
+                    return row.mealIngredients;
                 });
-                await database.mealingredients.bulkCreate(records);
+                await database.mealIngredients.bulkCreate(records);
             }
             return res.status(201).json(createdMeal);
         } catch (error) {
@@ -83,14 +82,13 @@ class MealController {
 
     static async updateChildren(newData, id) {
         const records = newData.ingredients.map(row => {
-            row.mealId = id;
-            row.ingredientId = row.id;
-            return row;
+            row.mealIngredients.mealId = id;
+            return row.mealIngredients;
         });
         //TODO check afterBulkDestroy as an option
         await Promise.all([
-            database.mealingredients.destroy({where: {mealId: id}}),
-            database.mealingredients.bulkCreate(records)
+            database.mealIngredients.destroy({where: {mealId: id}}),
+            database.mealIngredients.bulkCreate(records)
         ]);
     }
 
@@ -98,7 +96,7 @@ class MealController {
         const id = Number(req.params.id);
         try {
             await Promise.all([
-                database.mealingredients.destroy({where: {mealId: id}}),
+                database.mealIngredients.destroy({where: {mealId: id}}),
                 database.meals.destroy({where: {id}})
             ]);
             return res.status(200).json(`row ${id} deleted`);
