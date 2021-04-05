@@ -17,7 +17,7 @@ class MealController {
         try {
             const element = req.query?.full ?
                 await MealController.findOneFull(id) :
-                await MealController.findOne(id)
+                await MealController.findOne(id);
 
             return res.status(200).json(element);
         } catch (error) {
@@ -29,7 +29,7 @@ class MealController {
         const meal = req.body;
         try {
             let createdMeal = await database.meals.create(meal);
-            if (meal.ingredients.length > 0)
+            if (meal.ingredients?.length > 0)
                 [, createdMeal] = await MealController.createChildren(meal, createdMeal.id);
             return res.status(201).json(createdMeal);
         } catch (error) {
@@ -71,7 +71,7 @@ class MealController {
         try {
             await database.meals.update(newData, {where: {id}});
             let result = await database.meals.findOne({where: {id}});
-            if (newData.ingredients.length > 0)
+            if (newData.ingredients?.length > 0)
                 result = await MealController.updateChildren(newData, id);
             return res.status(200).json(result);
         } catch (error) {
@@ -82,8 +82,8 @@ class MealController {
     static async updateChildren(newData, id) {
         const records = MealController.getMealIngredients(newData, id);
         //TODO check afterBulkDestroy as an option
-        await database.mealIngredients.destroy({where: {mealId: id}})
-        await database.mealIngredients.bulkCreate(records)
+        await database.mealIngredients.destroy({where: {mealId: id}});
+        await database.mealIngredients.bulkCreate(records);
         return MealController.findOneFull(id);
     }
 
