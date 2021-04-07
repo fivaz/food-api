@@ -1,6 +1,6 @@
 'use strict';
 const {Model} = require('sequelize');
-
+//TODO rename file to mealIngredients (meal in singular)
 module.exports = (sequelize, DataTypes) => {
     class MealIngredients extends Model {
         /**
@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            models.ingredients.belongsToMany(models.meals, {through: this,foreignKey:'ingredientId'})
-            models.meals.belongsToMany(models.ingredients, {through: this,foreignKey:'mealId'})
+            models.ingredients.belongsToMany(models.meals, {through: this, foreignKey: 'ingredientId'});
+            models.meals.belongsToMany(models.ingredients, {through: this, foreignKey: 'mealId'});
         }
     }
 

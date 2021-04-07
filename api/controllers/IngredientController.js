@@ -2,9 +2,41 @@ const database = require('../models');
 
 class IngredientController {
     static async getAll(req, res) {
+        const {query} = req;
+        if (query.mealId) {
+            return IngredientController.getAllWithQuantities(req, res);
+        }
         try {
             const all = await database.ingredients.findAll();
             return res.status(200).json(all);
+        } catch (error) {
+            return res.status(500).json(error.message);
+        }
+    }
+
+    static async getAllWithQuantities(req, res) {
+        const {mealId} = req.query;
+        try {
+            const options = {
+                include: [{
+                    model: database.meals,
+                    required: false,
+                    where: {id: Number(mealId)},
+                    attributes: ['id'],
+                    through: {
+                        attributes: ['quantity']
+                    },
+                }],
+                raw: true,
+                nest: true
+            };
+            const all = await database.ingredients.findAll(options);
+            const ingredientsWithQuantities = all.map(ingredient => {
+                ingredient.mealIngredients = ingredient.meals.mealIngredients;
+                delete ingredient.meals;
+                return ingredient;
+            });
+            return res.status(200).json(ingredientsWithQuantities);
         } catch (error) {
             return res.status(500).json(error.message);
         }

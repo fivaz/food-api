@@ -30,17 +30,24 @@ class MealController {
         try {
             let createdMeal = await database.meals.create(meal);
             if (meal.ingredients?.length > 0)
-                [, createdMeal] = await MealController.createChildren(meal, createdMeal.id);
+                createdMeal = await MealController.createChildren(meal, createdMeal.id);
             return res.status(201).json(createdMeal);
         } catch (error) {
             return res.status(500).json(error.message);
         }
     }
 
-    //TODO check if I can remove these Number(id)
-    static async findOne(id) {
-        return database.meals.findOne({
-            where: {id: Number(id)}
+    static async createChildren(meal, id) {
+        const records = MealController.getMealIngredients(meal, id);
+        await database.mealIngredients.bulkCreate(records);
+        return MealController.findOneFull(id);
+    }
+
+    static getMealIngredients(meal, id) {
+        return meal.ingredients.map(ingredient => {
+            ingredient.mealIngredients.ingredientId = ingredient.id;
+            ingredient.mealIngredients.mealId = id;
+            return ingredient.mealIngredients;
         });
     }
 
@@ -51,16 +58,10 @@ class MealController {
         });
     }
 
-    static async createChildren(meal, id) {
-        const records = MealController.getMealIngredients(meal, id);
-        await database.mealIngredients.bulkCreate(records);
-        return MealController.findOneFull(id);
-    }
-
-    static getMealIngredients(meal, id) {
-        return meal.ingredients.map(row => {
-            row.mealIngredients.mealId = id;
-            return row.mealIngredients;
+    //TODO check if I can remove these Number(id)
+    static async findOne(id) {
+        return database.meals.findOne({
+            where: {id: Number(id)}
         });
     }
 
