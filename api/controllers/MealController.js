@@ -1,9 +1,14 @@
-const { MealIngredients, Meal } = require('../models');
+const { Meal, Ingredient } = require('../models');
 
 class MealController {
   static async getAll(req, res) {
     try {
-      const options = req.query?.full ? { include: 'ingredients' } : {};
+      const options = req.query?.full ? {
+        include: {
+          model: Ingredient,
+          as: 'ingredients',
+        },
+      } : {};
       const all = await Meal.findAll(options);
       return res.status(200)
         .json(all);
@@ -44,8 +49,8 @@ class MealController {
   }
 
   static async createChildren(meal, id) {
-    const records = MealController.getMealIngredients(meal, id);
-    await MealIngredients.bulkCreate(records);
+    // const records = MealController.getMealIngredients(meal, id);
+    // await MealIngredients.bulkCreate(records);
     return MealController.findOneFull(id);
   }
 
@@ -61,7 +66,10 @@ class MealController {
   static async findOneFull(id) {
     return Meal.findOne({
       where: { id: Number(id) },
-      include: 'ingredients',
+      include: {
+        model: Ingredient,
+        as: 'ingredients',
+      },
     });
   }
 
@@ -91,10 +99,10 @@ class MealController {
   }
 
   static async updateChildren(newData, id) {
-    const records = MealController.getMealIngredients(newData, id);
+    // const records = MealController.getMealIngredients(newData, id);
     // TODO check afterBulkDestroy as an option
-    await MealIngredients.destroy({ where: { mealId: id } });
-    await MealIngredients.bulkCreate(records);
+    // await MealIngredients.destroy({ where: { mealId: id } });
+    // await MealIngredients.bulkCreate(records);
     return MealController.findOneFull(id);
   }
 
@@ -102,7 +110,7 @@ class MealController {
     const id = Number(req.params.id);
     try {
       await Promise.all([
-        MealIngredients.destroy({ where: { mealId: id } }),
+        // MealIngredients.destroy({ where: { mealId: id } }),
         Meal.destroy({ where: { id } }),
       ]);
       return res.status(200)

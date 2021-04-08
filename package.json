@@ -29,7 +29,7 @@
     "morgan": "^1.10.0",
     "mysql2": "^2.2.5",
     "path": "^0.12.7",
-    "sequelize": "^5.22.3",
+    "sequelize": "^6.6.2",
     "sequelize-cli": "^6.2.0"
   },
   "devDependencies": {

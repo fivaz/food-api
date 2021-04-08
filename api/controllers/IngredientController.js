@@ -1,4 +1,4 @@
-const { Ingredient } = require('../models');
+const { Ingredient, Meal, MealIngredients } = require('../models');
 
 class IngredientController {
   static async getAll(req, res) {
@@ -20,14 +20,37 @@ class IngredientController {
     const { mealId } = req.query;
     try {
       const options = {
+        include: {
+          model: MealIngredients,
+          as: 'mealIngredients',
+          required: false,
+          where: { mealId: Number(mealId) },
+        },
+        raw: true,
+        nest: true,
+      };
+      const all = await Ingredient.findAll(options);
+      return res.status(200)
+        .json(all);
+    } catch (error) {
+      return res.status(500)
+        .json(error.message);
+    }
+  }
+
+  static async getAllWithQuantities2(req, res) {
+    const { mealId } = req.query;
+    try {
+      const options = {
         include: [{
-          model: 'meal',
+          model: Meal,
+          as: 'meals',
           required: false,
           where: { id: Number(mealId) },
-          attributes: ['id'],
-          through: {
-            attributes: ['quantity'],
-          },
+          // attributes: ['id'],
+          // through: {
+          //   attributes: ['quantity'],
+          // },
         }],
         raw: true,
         nest: true,
@@ -35,7 +58,7 @@ class IngredientController {
       const all = await Ingredient.findAll(options);
       const ingredientsWithQuantities = all.map((ingredient) => {
         const ingredientWithQuantity = ingredient;
-        ingredientWithQuantity.mealIngredients = ingredient.meals.mealIngredients;
+        ingredientWithQuantity.MealIngredients = ingredient.meals.MealIngredients;
         delete ingredientWithQuantity.meals;
         return ingredientWithQuantity;
       });
