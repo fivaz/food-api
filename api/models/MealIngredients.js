@@ -1,20 +1,16 @@
-const { Model } = require('sequelize');
-// TODO rename file to mealIngredients (meal in singular)
 module.exports = (sequelize, DataTypes) => {
-  class MealIngredients extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-  }
-
-  MealIngredients.init({
+  const MealIngredients = sequelize.define('MealIngredients', {
     quantity: DataTypes.DOUBLE,
-  }, {
-    sequelize,
-    modelName: 'MealIngredients',
-  });
+  }, {});
+
+  MealIngredients.associate = ({ Meal, Ingredient }) => {
+    MealIngredients.belongsTo(Ingredient, {
+      foreignKey: 'ingredientId',
+    });
+    MealIngredients.belongsTo(Meal, {
+      foreignKey: 'mealId',
+    });
+  };
 
   return MealIngredients;
 };
