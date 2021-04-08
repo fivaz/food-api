@@ -4,7 +4,17 @@
     "password": "root",
     "database": "food_dev",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "define": {
+      "defaultScope": {
+        "attributes": {
+          "exclude": [
+            "createdAt",
+            "updatedAt"
+          ]
+        }
+      }
+    }
   },
   "test": {
     "username": "root",

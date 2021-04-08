@@ -1,4 +1,4 @@
-const {Router} = require('express');
+const { Router } = require('express');
 const IngredientController = require('../controllers/IngredientController');
 
 const router = Router();

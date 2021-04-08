@@ -1,4 +1,3 @@
-'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('ingredients', {
@@ -6,34 +5,34 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       unit: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       isCountable: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
       },
       price: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       quantity: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface) => {
     await queryInterface.dropTable('ingredients');
-  }
+  },
 };

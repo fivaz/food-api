@@ -1,4 +1,5 @@
 const express = require('express');
+
 const app = express();
 const cors = require('cors');
 const logger = require('morgan');
@@ -10,7 +11,8 @@ routes(app);
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () =>
-    console.log(`Server running in the port ${port}`));
+// TODO use a log library like winston
+// eslint-disable-next-line no-console
+app.listen(port, () => console.log(`Server running in the port ${port}`));
 
 module.exports = app;
