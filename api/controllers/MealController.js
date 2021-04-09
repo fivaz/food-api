@@ -1,15 +1,10 @@
-const { Meal, Ingredient } = require('../models');
+const { Meal, Ingredient, MealIngredients } = require('../models');
 
 class MealController {
   static async getAll(req, res) {
     try {
-      const options = req.query?.full ? {
-        include: {
-          model: Ingredient,
-          as: 'ingredients',
-        },
-      } : {};
-      const all = await Meal.findAll(options);
+      const all = await Meal.scope(req.query?.scope)
+        .findAll();
       return res.status(200)
         .json(all);
     } catch (error) {
@@ -49,8 +44,8 @@ class MealController {
   }
 
   static async createChildren(meal, id) {
-    // const records = MealController.getMealIngredients(meal, id);
-    // await MealIngredients.bulkCreate(records);
+    const records = MealController.getMealIngredients(meal, id);
+    await MealIngredients.bulkCreate(records);
     return MealController.findOneFull(id);
   }
 
@@ -99,10 +94,10 @@ class MealController {
   }
 
   static async updateChildren(newData, id) {
-    // const records = MealController.getMealIngredients(newData, id);
+    const records = MealController.getMealIngredients(newData, id);
     // TODO check afterBulkDestroy as an option
-    // await MealIngredients.destroy({ where: { mealId: id } });
-    // await MealIngredients.bulkCreate(records);
+    await MealIngredients.destroy({ where: { mealId: id } });
+    await MealIngredients.bulkCreate(records);
     return MealController.findOneFull(id);
   }
 
@@ -110,7 +105,7 @@ class MealController {
     const id = Number(req.params.id);
     try {
       await Promise.all([
-        // MealIngredients.destroy({ where: { mealId: id } }),
+        MealIngredients.destroy({ where: { mealId: id } }),
         Meal.destroy({ where: { id } }),
       ]);
       return res.status(200)
