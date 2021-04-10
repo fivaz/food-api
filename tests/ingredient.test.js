@@ -1,8 +1,9 @@
 const request = require('supertest');
-const { Ingredient } = require('../api/models');
+const db = require('../api/models');
 const app = require('../index');
 
 const ingredientsURL = '/ingredients';
+const { Ingredient } = db;
 
 const getLatestIngredient = () => Ingredient.findOne({
   order: [['createdAt', 'DESC']],
@@ -19,6 +20,11 @@ async function createIngredient() {
   return id;
 }
 
+afterAll(() => {
+  db.sequelize.close()
+    .then();
+});
+
 describe('Ingredient API', () => {
   it('should show all ingredients', async () => {
     const response = await request(app)
@@ -26,9 +32,8 @@ describe('Ingredient API', () => {
     expect(response.statusCode)
       .toBe(200);
 
-    const number = await Ingredient.count();
     expect(response.body)
-      .toHaveLength(number);
+      .toHaveLength(await Ingredient.count());
   });
 
   it('should show an ingredient', async () => {

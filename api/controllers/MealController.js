@@ -35,10 +35,10 @@ class MealController {
   static async create(req, res) {
     const meal = req.body;
     try {
-      let createdMeal = await Meal.create(meal);
-      if (meal.ingredients?.length > 0) {
-        createdMeal = await MealController.createChildren(meal, createdMeal.id);
-      }
+      const createdMeal = await (meal.ingredients?.length > 0
+        ? MealController.createWithChildren(meal)
+        : Meal.create(meal));
+
       return res.status(201)
         .json(createdMeal);
     } catch (error) {
@@ -47,58 +47,57 @@ class MealController {
     }
   }
 
-  static async createChildren(meal, id) {
-    const records = MealController.getMealIngredients(meal, id);
-    await MealIngredient.bulkCreate(records);
+  static async createWithChildren(meal) {
+    const { id } = await Meal.create(meal);
+    const meaIngredients = MealController.getMealIngredients(meal.ingredients, id);
+    await MealIngredient.bulkCreate(meaIngredients);
     return Meal.scope(['defaultScope', 'full'])
       .findByPk(id);
   }
 
-  static getMealIngredients(meal, id) {
-    return meal.ingredients.map((ingredient) => {
+  static getMealIngredients(ingredients, mealId) {
+    return ingredients.map((ingredient) => {
       const { mealIngredients } = ingredient;
       mealIngredients.ingredientId = ingredient.id;
-      mealIngredients.mealId = id;
+      mealIngredients.mealId = mealId;
       return mealIngredients;
     });
   }
 
-  // TODO try to do this better
   static async update(req, res) {
-    const id = Number(req.params.id);
-    const newData = req.body;
+    const { id } = req.params;
+    const newMeal = req.body;
     try {
-      await Meal.update(newData, { where: { id } });
-      let mealController = await Meal.findByPk(id);
-      if (newData.ingredients?.length > 0) {
-        mealController = await MealController.updateChildren(newData, id);
-      }
+      await Promise.all([
+        Meal.update(newMeal, { where: { id } }),
+        MealController.updateChildren(newMeal, id),
+      ]);
+      const meal = await Meal.scope(['defaultScope', 'full'])
+        .findByPk(id);
+
       return res.status(200)
-        .json(mealController);
+        .json(meal);
     } catch (error) {
       return res.status(500)
         .json(error.message);
     }
   }
 
-  static async updateChildren(newData, id) {
-    const records = MealController.getMealIngredients(newData, id);
-    // TODO check afterBulkDestroy as an option
+  static async updateChildren(meal, id) {
+    const mealIngredients = MealController.getMealIngredients(meal.ingredients, id);
     await MealIngredient.destroy({ where: { mealId: id } });
-    await MealIngredient.bulkCreate(records);
-    return Meal.scope(['defaultScope', 'full'])
-      .findByPk(id);
+    await MealIngredient.bulkCreate(mealIngredients);
   }
 
   static async delete(req, res) {
-    const id = Number(req.params.id);
     try {
+      const { id } = req.params;
       await Promise.all([
         MealIngredient.destroy({ where: { mealId: id } }),
         Meal.destroy({ where: { id } }),
       ]);
       return res.status(200)
-        .json(`row ${id} deleted`);
+        .json('meal removed');
     } catch (error) {
       return res.status(500)
         .json(error.message);
