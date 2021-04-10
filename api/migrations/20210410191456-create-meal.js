@@ -7,11 +7,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      name: {
-        type: Sequelize.STRING,
+      date: {
+        type: Sequelize.DATE,
       },
-      category: {
-        type: Sequelize.ENUM('breakfast', 'brunch', 'lunch', 'tea', 'supper', 'dinner'),
+      dishId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'dishes',
+          key: 'id',
+        },
       },
       createdAt: {
         allowNull: false,

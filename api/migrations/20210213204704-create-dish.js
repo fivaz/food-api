@@ -1,22 +1,17 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('histories', {
+    await queryInterface.createTable('dishes', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      date: {
-        type: Sequelize.DATE,
+      name: {
+        type: Sequelize.STRING,
       },
-      mealId: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'meals',
-          key: 'id',
-        },
+      category: {
+        type: Sequelize.ENUM('breakfast', 'brunch', 'lunch', 'tea', 'supper', 'dinner'),
       },
       createdAt: {
         allowNull: false,
@@ -29,6 +24,6 @@ module.exports = {
     });
   },
   down: async (queryInterface) => {
-    await queryInterface.dropTable('histories');
+    await queryInterface.dropTable('dishes');
   },
 };

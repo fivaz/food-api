@@ -2,23 +2,20 @@ module.exports = {
   up: async (queryInterface) => {
     await queryInterface.bulkInsert('meals', [
       {
-        id: 1,
-        name: 'Chicken Filet with Rice',
-        category: 'lunch',
+        date: new Date(),
+        dishId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 2,
-        name: 'Nutella and Peanut butter Sandwich',
-        category: 'tea',
+        date: new Date(),
+        dishId: 2,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 3,
-        name: 'Spaghetti of Chicken and Eggs',
-        category: 'dinner',
+        date: new Date(),
+        dishId: 3,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

@@ -7,41 +7,26 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Ingredient, MealIngredient, History }) {
-      Meal.belongsToMany(Ingredient, {
-        through: MealIngredient,
-        foreignKey: 'mealId',
-        as: 'ingredients',
-      });
-
-      Meal.hasMany(MealIngredient, {
-        foreignKey: 'mealId',
-      });
-
-      Meal.hasMany(History, {
-        foreignKey: 'mealId',
+    static associate({ Dish }) {
+      Meal.belongsTo(Dish, {
+        foreignKey: 'dishId',
+        as: 'dish',
       });
 
       Meal.addScope('full', {
         include: {
-          model: Ingredient,
-          as: 'ingredients',
-          through: {
-            as: 'mealIngredients',
-            attributes: ['quantity'],
-          },
+          model: Dish,
+          as: 'dish',
         },
       });
     }
   }
 
   Meal.init({
-    name: DataTypes.STRING,
-    category: DataTypes.ENUM('breakfast', 'brunch', 'lunch', 'tea', 'supper', 'dinner'),
+    date: DataTypes.DATE,
   }, {
     sequelize,
     modelName: 'Meal',
   });
-
   return Meal;
 };

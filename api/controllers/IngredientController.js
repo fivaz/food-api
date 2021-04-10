@@ -3,8 +3,8 @@ const { Ingredient } = require('../models');
 class IngredientController {
   static async getAll(req, res) {
     try {
-      const ingredients = await (req.query?.mealId
-        ? IngredientController.findAllWithQuantities(req.query?.mealId)
+      const ingredients = await (req.query?.dishId
+        ? IngredientController.findAllWithQuantities(req.query?.dishId)
         : Ingredient.findAll());
 
       return res.status(200)
@@ -15,8 +15,8 @@ class IngredientController {
     }
   }
 
-  static async findAllWithQuantities(mealId) {
-    return Ingredient.scope(['defaultScope', { method: ['withMeal', mealId] }])
+  static async findAllWithQuantities(dishId) {
+    return Ingredient.scope(['defaultScope', { method: ['withDish', dishId] }])
       .findAll();
   }
 

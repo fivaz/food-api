@@ -1,21 +1,24 @@
 module.exports = {
   up: async (queryInterface) => {
-    await queryInterface.bulkInsert('histories', [
+    await queryInterface.bulkInsert('dishIngredients', [
       {
-        date: new Date(),
-        mealId: 1,
+        quantity: null,
+        dishId: 1,
+        ingredientId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        date: new Date(),
-        mealId: 2,
+        quantity: 200,
+        dishId: 1,
+        ingredientId: 2,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        date: new Date(),
-        mealId: 3,
+        quantity: 200,
+        dishId: 1,
+        ingredientId: 7,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -23,6 +26,6 @@ module.exports = {
   },
 
   down: async (queryInterface) => {
-    await queryInterface.bulkDelete('histories', {});
+    await queryInterface.bulkDelete('dishIngredients', {});
   },
 };

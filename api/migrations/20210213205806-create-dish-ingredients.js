@@ -1,6 +1,6 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('mealIngredients', {
+    await queryInterface.createTable('dishIngredients', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,11 +10,11 @@ module.exports = {
       quantity: {
         type: Sequelize.DOUBLE,
       },
-      mealId: {
+      dishId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: 'meals',
+          model: 'dishes',
           key: 'id',
         },
       },
@@ -37,6 +37,6 @@ module.exports = {
     });
   },
   down: async (queryInterface) => {
-    await queryInterface.dropTable('mealIngredients');
+    await queryInterface.dropTable('dishIngredients');
   },
 };

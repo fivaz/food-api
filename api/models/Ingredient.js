@@ -7,24 +7,24 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Meal, MealIngredient }) {
-      Ingredient.belongsToMany(Meal, {
-        through: MealIngredient,
+    static associate({ Dish, DishIngredient }) {
+      Ingredient.belongsToMany(Dish, {
+        through: DishIngredient,
         foreignKey: 'ingredientId',
-        as: 'meals',
+        as: 'dishes',
       });
 
-      Ingredient.hasMany(MealIngredient, {
+      Ingredient.hasMany(DishIngredient, {
         foreignKey: 'ingredientId',
-        as: 'mealIngredients',
+        as: 'dishIngredients',
       });
 
-      Ingredient.addScope('withMeal', (mealId) => ({
+      Ingredient.addScope('withDish', (dishId) => ({
         include: {
-          model: MealIngredient,
-          as: 'mealIngredients',
+          model: DishIngredient,
+          as: 'dishIngredients',
           required: false,
-          where: { mealId: Number(mealId) },
+          where: { dishId: Number(dishId) },
         },
         raw: true,
         nest: true,
