@@ -13,8 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Ingredient.hasMany(MealIngredient, {
-        as: 'mealIngredients',
         foreignKey: 'ingredientId',
+        as: 'mealIngredients',
       });
 
       Ingredient.addScope('withMeal', (mealId) => ({

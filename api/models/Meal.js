@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         include: {
           model: Ingredient,
           as: 'ingredients',
+          through: {
+            as: 'mealIngredients',
+            attributes: ['quantity'],
+          },
         },
       });
     }
