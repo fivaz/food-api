@@ -8,12 +8,24 @@ const getLatestIngredient = () => Ingredient.findOne({
   order: [['createdAt', 'DESC']],
 });
 
+async function createIngredient() {
+  const { id } = await Ingredient.create({
+    name: 'Milka',
+    isCountable: false,
+    price: 5.55,
+    unit: 'g',
+    quantity: 5.5,
+  });
+  return id;
+}
+
 describe('Ingredient API', () => {
   it('should show all ingredients', async () => {
     const response = await request(app)
       .get(ingredientsURL);
     expect(response.statusCode)
       .toBe(200);
+
     const number = await Ingredient.count();
     expect(response.body)
       .toHaveLength(number);
@@ -25,6 +37,7 @@ describe('Ingredient API', () => {
       .get(`${ingredientsURL}/${id}`);
     expect(response.statusCode)
       .toEqual(200);
+
     const ingredient = (await Ingredient.findByPk(id)).toJSON();
     expect(response.body)
       .toEqual(ingredient);
@@ -35,6 +48,7 @@ describe('Ingredient API', () => {
       .get(`${ingredientsURL}/10000`);
     expect(res.statusCode)
       .toEqual(200);
+
     expect(res.body)
       .toBeNull();
   });
@@ -63,13 +77,7 @@ describe('Ingredient API', () => {
   });
 
   it('should update a ingredient', async () => {
-    const createdIngredient = await Ingredient.create({
-      name: 'Milka',
-      isCountable: false,
-      price: 5.55,
-      unit: 'g',
-      quantity: 5.5,
-    });
+    const id = await createIngredient();
 
     const newIngredient = {
       name: 'Milk',
@@ -80,7 +88,7 @@ describe('Ingredient API', () => {
     };
 
     const res = await request(app)
-      .put(`${ingredientsURL}/${createdIngredient.id}`)
+      .put(`${ingredientsURL}/${id}`)
       .send(newIngredient);
     expect(res.statusCode)
       .toEqual(200);
@@ -90,20 +98,14 @@ describe('Ingredient API', () => {
   });
 
   it('should delete a ingredient', async () => {
-    const createdIngredient = await Ingredient.create({
-      name: 'Milka',
-      isCountable: false,
-      price: 5.55,
-      unit: 'g',
-      quantity: 5.5,
-    });
+    const id = await createIngredient();
 
     const res = await request(app)
-      .del(`${ingredientsURL}/${createdIngredient.id}`);
+      .del(`${ingredientsURL}/${id}`);
     expect(res.statusCode)
       .toEqual(200);
 
-    const foundIngredient = await Ingredient.findByPk(createdIngredient.id);
+    const foundIngredient = await Ingredient.findByPk(id);
     expect(foundIngredient)
       .toBeNull();
   });
