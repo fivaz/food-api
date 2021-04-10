@@ -5,9 +5,6 @@ const app = require('../index');
 const mealsURL = '/meals';
 const { Meal } = db;
 
-const getLatestMeal = () => Meal.scope(['defaultScope', 'full'])
-  .findOne({ order: [['id', 'DESC']] });
-
 async function createMeal() {
   const { id } = await Meal.create({
     name: 'Cassoulet',
@@ -19,6 +16,11 @@ async function createMeal() {
     ],
   });
   return id;
+}
+
+async function getLatestMeal() {
+  return (await Meal.scope(['defaultScope', 'full'])
+    .findOne({ order: [['id', 'DESC']] })).toJSON();
 }
 
 describe('Meal API', () => {
@@ -47,7 +49,7 @@ describe('Meal API', () => {
     const mealsWithIngredientsObjects = JSON.parse(JSON.stringify(mealsWithIngredientsModels));
 
     expect(response.body)
-      .toEqual(mealsWithIngredientsObjects);
+      .toStrictEqual(mealsWithIngredientsObjects);
   });
 
   it('should show a meal', async () => {
@@ -58,11 +60,12 @@ describe('Meal API', () => {
       .toEqual(200);
 
     const meal = (await Meal.findByPk(id)).toJSON();
+
     expect(response.body)
-      .toMatchObject(meal);
+      .toStrictEqual(meal);
   });
 
-  it('shouldn\'t show an meal', async () => {
+  it('shouldn\'t show a meal', async () => {
     const res = await request(app)
       .get(`${mealsURL}/10000`);
     expect(res.statusCode)
@@ -88,7 +91,7 @@ describe('Meal API', () => {
       .toEqual(201);
 
     expect(res.body)
-      .toStrictEqual((await getLatestMeal()).toJSON());
+      .toStrictEqual(await getLatestMeal());
   });
 
   it('should update a meal', async () => {
@@ -109,9 +112,11 @@ describe('Meal API', () => {
     expect(res.statusCode)
       .toEqual(200);
 
+    const meal = (await Meal.scope(['defaultScope', 'full'])
+      .findByPk(id)).toJSON();
+
     expect(res.body)
-      .toStrictEqual((await Meal.scope(['defaultScope', 'full'])
-        .findByPk(id)).toJSON());
+      .toStrictEqual(meal);
   });
 
   it('should delete a meal', async () => {
