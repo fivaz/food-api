@@ -2,14 +2,17 @@ const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Meal extends Model {
-    static associate({ Ingredient, MealIngredients }) {
+    /**
+     * Dynamic association
+     * */
+    static associate({ Ingredient, MealIngredient }) {
       Meal.belongsToMany(Ingredient, {
-        through: MealIngredients,
+        through: MealIngredient,
         foreignKey: 'mealId',
         as: 'ingredients',
       });
 
-      Meal.hasMany(MealIngredients, {
+      Meal.hasMany(MealIngredient, {
         foreignKey: 'mealId',
       });
 

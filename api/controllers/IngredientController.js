@@ -1,79 +1,28 @@
-const { Ingredient, Meal, MealIngredients } = require('../models');
+const { Ingredient } = require('../models');
 
 class IngredientController {
   static async getAll(req, res) {
-    const { query } = req;
-    if (query.mealId) {
-      return IngredientController.getAllWithQuantities(req, res);
-    }
     try {
-      const all = await Ingredient.findAll();
+      const ingredients = await (req.query?.mealId
+        ? IngredientController.findAllWithQuantities(req.query?.mealId)
+        : Ingredient.findAll());
+
       return res.status(200)
-        .json(all);
+        .json(ingredients);
     } catch (error) {
       return res.status(500)
         .json(error.message);
     }
   }
 
-  static async getAllWithQuantities(req, res) {
-    const { mealId } = req.query;
-    try {
-      const options = {
-        include: {
-          model: MealIngredients,
-          as: 'mealIngredients',
-          required: false,
-          where: { mealId: Number(mealId) },
-        },
-        raw: true,
-        nest: true,
-      };
-      const all = await Ingredient.findAll(options);
-      return res.status(200)
-        .json(all);
-    } catch (error) {
-      return res.status(500)
-        .json(error.message);
-    }
-  }
-
-  static async getAllWithQuantities2(req, res) {
-    const { mealId } = req.query;
-    try {
-      const options = {
-        include: [{
-          model: Meal,
-          as: 'meals',
-          required: false,
-          where: { id: Number(mealId) },
-          // attributes: ['id'],
-          // through: {
-          //   attributes: ['quantity'],
-          // },
-        }],
-        raw: true,
-        nest: true,
-      };
-      const all = await Ingredient.findAll(options);
-      const ingredientsWithQuantities = all.map((ingredient) => {
-        const ingredientWithQuantity = ingredient;
-        ingredientWithQuantity.MealIngredients = ingredient.meals.MealIngredients;
-        delete ingredientWithQuantity.meals;
-        return ingredientWithQuantity;
-      });
-      return res.status(200)
-        .json(ingredientsWithQuantities);
-    } catch (error) {
-      return res.status(500)
-        .json(error.message);
-    }
+  static async findAllWithQuantities(mealId) {
+    return Ingredient.scope(['defaultScope', { method: ['withMeal', mealId] }])
+      .findAll();
   }
 
   static async get(req, res) {
-    const { id } = req.params;
     try {
-      const element = await Ingredient.findOne({ where: { id: Number(id) } });
+      const element = await Ingredient.findByPk(req.params.id);
       return res.status(200)
         .json(element);
     } catch (error) {
@@ -83,11 +32,10 @@ class IngredientController {
   }
 
   static async create(req, res) {
-    const ingredient = req.body;
     try {
-      const createdIngredient = await Ingredient.create(ingredient);
+      const ingredient = await Ingredient.create(req.body);
       return res.status(201)
-        .json(createdIngredient);
+        .json(ingredient);
     } catch (error) {
       return res.status(500)
         .json(error.message);
@@ -95,11 +43,10 @@ class IngredientController {
   }
 
   static async update(req, res) {
-    const id = Number(req.params.id);
-    const newData = req.body;
     try {
-      await Ingredient.update(newData, { where: { id } });
-      const updatedIngredient = await Ingredient.findOne({ where: { id } });
+      const { id } = req.params;
+      await Ingredient.update(req.body, { where: { id } });
+      const updatedIngredient = await Ingredient.findByPk(id);
       return res.status(200)
         .json(updatedIngredient);
     } catch (error) {
@@ -109,11 +56,10 @@ class IngredientController {
   }
 
   static async delete(req, res) {
-    const { id } = req.params;
     try {
-      await Ingredient.destroy({ where: { id: Number(id) } });
+      await Ingredient.destroy({ where: { id: req.params.id } });
       return res.status(200)
-        .json(`row ${id} deleted`);
+        .json('ingredient removed');
     } catch (error) {
       return res.status(500)
         .json(error.message);

@@ -1,23 +1,45 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Ingredient = sequelize.define('Ingredient', {
+  class Ingredient extends Model {
+    /**
+     * Dynamic association
+     * */
+    static associate({ Meal, MealIngredient }) {
+      Ingredient.belongsToMany(Meal, {
+        through: MealIngredient,
+        foreignKey: 'ingredientId',
+        as: 'meals',
+      });
+
+      Ingredient.hasMany(MealIngredient, {
+        as: 'mealIngredients',
+        foreignKey: 'ingredientId',
+      });
+
+      Ingredient.addScope('withMeal', (mealId) => ({
+        include: {
+          model: MealIngredient,
+          as: 'mealIngredients',
+          required: false,
+          where: { mealId: Number(mealId) },
+        },
+        raw: true,
+        nest: true,
+      }));
+    }
+  }
+
+  Ingredient.init({
     name: DataTypes.STRING,
     unit: DataTypes.STRING,
     isCountable: DataTypes.BOOLEAN,
     price: DataTypes.DOUBLE,
     quantity: DataTypes.DOUBLE,
-  }, {});
-
-  Ingredient.associate = ({ Meal, MealIngredients }) => {
-    Ingredient.belongsToMany(Meal, {
-      through: MealIngredients,
-      foreignKey: 'ingredientId',
-      as: 'meals',
-    });
-    Ingredient.hasMany(MealIngredients, {
-      as: 'mealIngredients',
-      foreignKey: 'ingredientId',
-    });
-  };
+  }, {
+    sequelize,
+    modelName: 'Ingredient',
+  });
 
   return Ingredient;
 };
