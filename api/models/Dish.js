@@ -7,20 +7,20 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Ingredient, DishIngredient, Meal }) {
+    static associate({
+      Ingredient, DishIngredient, Meal, User,
+    }) {
       Dish.belongsToMany(Ingredient, {
         through: DishIngredient,
         foreignKey: 'dishId',
         as: 'ingredients',
       });
 
-      Dish.hasMany(DishIngredient, {
-        foreignKey: 'dishId',
-      });
+      Dish.belongsTo(User, { foreignKey: 'userId' });
 
-      Dish.hasMany(Meal, {
-        foreignKey: 'dishId',
-      });
+      Dish.hasMany(DishIngredient, { foreignKey: 'dishId' });
+
+      Dish.hasMany(Meal, { foreignKey: 'dishId' });
 
       Dish.addScope('full', {
         include: {

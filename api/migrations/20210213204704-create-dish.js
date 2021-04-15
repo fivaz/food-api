@@ -13,6 +13,14 @@ module.exports = {
       category: {
         type: Sequelize.ENUM('breakfast', 'brunch', 'lunch', 'tea', 'supper', 'dinner'),
       },
+      userId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
