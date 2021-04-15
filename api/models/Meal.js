@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
 
       Meal.addScope('full', {
         include: {
-          model: Dish,
+          model: Dish.scope(['defaultScope', 'full']),
           as: 'dish',
         },
       });
