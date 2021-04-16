@@ -15,12 +15,13 @@ module.exports = (sequelize, DataTypes) => {
 
       Meal.belongsTo(User, { foreignKey: 'userId' });
 
-      Meal.addScope('full', {
+      Meal.addScope('full', (userId) => ({
+        where: { userId },
         include: {
-          model: Dish.scope(['defaultScope', 'full']),
+          model: Dish.scope(['defaultScope', { method: ['full', userId] }]),
           as: 'dish',
         },
-      });
+      }));
     }
   }
 

@@ -3,7 +3,7 @@ const { Meal } = require('../models');
 class MealController {
   static async getAll(req, res) {
     try {
-      const meals = await Meal.scope(['defaultScope', 'full'])
+      const meals = await Meal.scope(['defaultScope', { method: ['full', req.user.id] }])
         .findAll();
       return res.status(200)
         .json(meals);

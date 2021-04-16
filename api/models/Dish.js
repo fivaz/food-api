@@ -22,7 +22,10 @@ module.exports = (sequelize, DataTypes) => {
 
       Dish.hasMany(Meal, { foreignKey: 'dishId' });
 
-      Dish.addScope('full', {
+      Dish.addScope('fromUser', (userId) => ({ where: { userId } }));
+
+      Dish.addScope('full', (userId) => ({
+        where: { userId },
         include: {
           model: Ingredient,
           as: 'ingredients',
@@ -30,8 +33,9 @@ module.exports = (sequelize, DataTypes) => {
             as: 'dishIngredients',
             attributes: ['quantity'],
           },
+          required: false,
         },
-      });
+      }));
     }
   }
 

@@ -2,8 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
-const SALT_ROUNDS = 10;
-const TOKEN_SECRET = process.env.TOKEN_SECRET || 'secretkey';
+const { TOKEN_SECRET } = require('../helpers/vars');
+const { SALT_ROUNDS } = require('../helpers/vars');
 
 class UserController {
   static async getAll(req, res) {
@@ -33,14 +33,14 @@ class UserController {
     try {
       const foundUser = await User.findOne({ where: { email: req.body.email } });
       if (foundUser && await bcrypt.compare(req.body.password, foundUser.password)) {
-        const signedUser = {
+        const user = {
           id: foundUser.id,
           name: foundUser.name,
           email: foundUser.email,
-          token: jwt.sign(foundUser.id, TOKEN_SECRET),
         };
+        user.token = jwt.sign(user, TOKEN_SECRET);
         return res.status(200)
-          .json(signedUser);
+          .json(user);
       }
       return res.status(401)
         .json('incorrect email or password');

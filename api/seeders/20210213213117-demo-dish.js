@@ -5,7 +5,7 @@ module.exports = {
         id: 1,
         name: 'Chicken Filet with Rice',
         category: 'lunch',
-        userId: 1,
+        userId: 2,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
