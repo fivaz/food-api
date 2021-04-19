@@ -1,14 +1,17 @@
 const request = require('supertest');
 const db = require('../api/models');
 const app = require('../index');
+const login = require('./authentification-mixin');
 
 const dishesURL = '/dishes';
 const { Dish } = db;
+let user = null;
 
 async function createDish() {
   const { id } = await Dish.create({
     name: 'Cassoulet',
     category: 'lunch',
+    userId: 1,
     ingredients: [
       { id: 2, dishIngredients: { quantity: 100 } },
       { id: 2, dishIngredients: { quantity: 20 } },
@@ -18,44 +21,35 @@ async function createDish() {
   return id;
 }
 
-async function getLatestDish() {
-  return (await Dish.scope(['defaultScope', 'full'])
-    .findOne({ order: [['id', 'DESC']] })).toJSON();
-}
-
 describe('Dish API', () => {
-  it('should show all dishes', async () => {
-    const response = await request(app)
-      .get(dishesURL);
-    expect(response.statusCode)
-      .toBe(200);
-
-    const dish = await Dish.count();
-
-    expect(response.body)
-      .toHaveLength(dish);
+  beforeAll(async () => {
+    user = await login(request(app));
   });
 
   it('should show all dishes with ingredients', async () => {
     const response = await request(app)
       .get(dishesURL)
-      .query({ scope: 'full' });
+      .query({ scope: 'full' })
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(response.statusCode)
       .toBe(200);
 
-    const dishesWithIngredientsModels = await Dish.scope(['defaultScope', 'full'])
+    const dishesModels = await Dish.scope(['defaultScope', { method: ['full', user.id] }])
       .findAll();
 
-    const dishesWithIngredientsObjects = JSON.parse(JSON.stringify(dishesWithIngredientsModels));
+    const dishesObjects = JSON.parse(JSON.stringify(dishesModels));
 
     expect(response.body)
-      .toStrictEqual(dishesWithIngredientsObjects);
+      .toStrictEqual(dishesObjects);
   });
 
   it('should show a dish', async () => {
     const id = 1;
     const response = await request(app)
-      .get(`${dishesURL}/${id}`);
+      .get(`${dishesURL}/${id}`)
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(response.statusCode)
       .toEqual(200);
 
@@ -67,7 +61,9 @@ describe('Dish API', () => {
 
   it('shouldn\'t show a dish', async () => {
     const res = await request(app)
-      .get(`${dishesURL}/10000`);
+      .get(`${dishesURL}/10000`)
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(200);
 
@@ -86,16 +82,26 @@ describe('Dish API', () => {
           { id: 2, dishIngredients: { quantity: 20 } },
           { id: 4, dishIngredients: { quantity: 25 } },
         ],
-      });
+      })
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(201);
 
+    const createdDishId = res.body.id;
+
+    const dishModel = await Dish.scope(['defaultScope', { method: ['full', user.id] }])
+      .findByPk(createdDishId);
+
+    const dishObject = JSON.parse(JSON.stringify(dishModel));
+
     expect(res.body)
-      .toStrictEqual(await getLatestDish());
+      .toStrictEqual(dishObject);
   });
 
   it('should update a dish', async () => {
     const id = await createDish();
+
     const newDish = {
       name: 'Nutella and Peanut butter Sandwich',
       category: 'tea',
@@ -108,22 +114,27 @@ describe('Dish API', () => {
 
     const res = await request(app)
       .put(`${dishesURL}/${id}`)
-      .send(newDish);
+      .send(newDish)
+      .set('Authorization', `Bearer ${user.token}`);
     expect(res.statusCode)
       .toEqual(200);
 
-    const dish = (await Dish.scope(['defaultScope', 'full'])
-      .findByPk(id)).toJSON();
+    const dishModel = await Dish.scope(['defaultScope', { method: ['full', user.id] }])
+      .findByPk(id);
+
+    const dishObject = dishModel.toJSON();
 
     expect(res.body)
-      .toStrictEqual(dish);
+      .toStrictEqual(dishObject);
   });
 
   it('should delete a dish', async () => {
     const id = await createDish();
 
     const res = await request(app)
-      .del(`${dishesURL}/${id}`);
+      .del(`${dishesURL}/${id}`)
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(200);
 

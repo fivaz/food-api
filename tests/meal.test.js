@@ -61,6 +61,29 @@ describe('Meal API', () => {
       .toStrictEqual(mealObject);
   });
 
+  it('should update a meal', async () => {
+    const id = await createMeal();
+
+    const res = await request(app)
+      .put(`${mealsURL}/${id}`)
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        date: new Date(),
+        dishId: 3,
+      });
+
+    expect(res.statusCode)
+      .toEqual(200);
+
+    const updatedMealId = res.body.id;
+    const mealModel = await Meal.scope(['defaultScope', { method: ['full', user.id] }])
+      .findByPk(updatedMealId);
+    const mealObject = JSON.parse(JSON.stringify(mealModel));
+
+    expect(res.body)
+      .toStrictEqual(mealObject);
+  });
+
   it('should update a meal date', async () => {
     const id = await createMeal();
 

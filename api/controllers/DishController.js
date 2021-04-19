@@ -1,15 +1,41 @@
 const createError = require('http-errors');
 const { Dish, DishIngredient } = require('../models');
-const { hasAccess } = require('../helpers/user-gate');
+const { checkRight } = require('../helpers/user-gate');
 
 class DishController {
+  static async findAllFull(userId) {
+    return Dish.scope(['defaultScope', { method: ['full', userId] }])
+      .findAll();
+  }
+
+  static async findAll(userId) {
+    return Dish.scope(['defaultScope', { method: ['fromUser', userId] }])
+      .findAll();
+  }
+
+  static async findFull(id, userId) {
+    return Dish.scope(['defaultScope', { method: ['full', userId] }])
+      .findByPk(id);
+  }
+
+  static async find(id, userId) {
+    return Dish.scope(['defaultScope', { method: ['fromUser', userId] }])
+      .findByPk(id);
+  }
+
+  static async findOrFail(id) {
+    const dish = await Dish.findByPk(id);
+    if (dish) {
+      return dish;
+    }
+    throw createError(404, 'the resource does not exist');
+  }
+
   static async getAll(req, res) {
     try {
       const dishes = await (req.query?.scope === 'full'
-        ? Dish.scope(['defaultScope', { method: ['full', req.user.id] }])
-          .findAll()
-        : Dish.scope(['defaultScope', { method: ['fromUser', req.user.id] }])
-          .findAll());
+        ? DishController.findAllFull(req.user.id)
+        : DishController.findAll(req.user.id));
 
       return res.status(200)
         .json(dishes);
@@ -23,10 +49,8 @@ class DishController {
     const { id } = req.params;
     try {
       const dish = await (req.query?.scope === 'full'
-        ? Dish.scope(['defaultScope', { method: ['full', req.user.id] }])
-          .findByPk(id)
-        : Dish.scope(['defaultScope', { method: ['fromUser', req.user.id] }])
-          .findByPk(id));
+        ? DishController.findAll(id, req.user.id)
+        : DishController.find(id, req.user.id));
 
       return res.status(200)
         .json(dish);
@@ -36,15 +60,17 @@ class DishController {
   }
 
   static async create(req, res) {
-    const dish = req.body;
-    dish.userId = req.user.id;
+    const data = req.body;
+    data.userId = req.user.id;
     try {
-      const createdDish = await (dish.ingredients?.length > 0
-        ? DishController.createWithChildren(dish)
-        : Dish.create(dish));
+      const { id } = await (data.ingredients?.length > 0
+        ? DishController.createWithChildren(data)
+        : Dish.create(data));
+
+      const dish = await DishController.findFull(id, req.user.id);
 
       return res.status(201)
-        .json(createdDish);
+        .json(dish);
     } catch (error) {
       return res.status(500)
         .json(error.message);
@@ -55,8 +81,7 @@ class DishController {
     const { id } = await Dish.create(dish);
     const meaIngredients = DishController.getDishIngredients(dish.ingredients, id);
     await DishIngredient.bulkCreate(meaIngredients);
-    return Dish.scope(['defaultScope', 'full'])
-      .findByPk(id);
+    return { id };
   }
 
   static getDishIngredients(ingredients, dishId) {
@@ -71,16 +96,16 @@ class DishController {
   static async update(req, res) {
     const { id } = req.params;
     try {
-      const oldDish = await DishController.findOrFail(id);
-      hasAccess(req.user, oldDish);
+      const foundDish = await DishController.findOrFail(id);
+      checkRight(req.user, foundDish);
 
-      const newDish = { ...req.body, userId: req.user.id };
+      const data = { ...req.body, userId: req.user.id };
       await Promise.all([
-        Dish.update(newDish, { where: { id } }),
-        DishController.updateChildren(newDish, id),
+        Dish.update(data, { where: { id } }),
+        DishController.updateChildren(data, id),
       ]);
-      const dish = await Dish.scope(['defaultScope', { method: ['full', req.user.id] }])
-        .findByPk(id);
+
+      const dish = await DishController.findFull(id, req.user.id);
 
       return res.status(200)
         .json(dish);
@@ -99,12 +124,12 @@ class DishController {
   static async delete(req, res) {
     const { id } = req.params;
     try {
-      const dish = await DishController.findOrFail(id);
-      hasAccess(req.user, dish);
+      const foundDish = await DishController.findOrFail(id);
+      checkRight(req.user, foundDish);
 
       // TODO constraint problem
       await DishIngredient.destroy({ where: { dishId: id } });
-      await dish.destroy(id);
+      await foundDish.destroy();
 
       return res.status(200)
         .json('dish removed');
@@ -112,14 +137,6 @@ class DishController {
       return res.status(error.status || 500)
         .json(error.message);
     }
-  }
-
-  static async findOrFail(id) {
-    const dish = await Dish.findByPk(id);
-    if (dish) {
-      return dish;
-    }
-    throw createError(404, 'the resource does not exist');
   }
 }
 
