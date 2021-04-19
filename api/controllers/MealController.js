@@ -13,11 +13,12 @@ class MealController {
     }
   }
 
-  // TODO make all create return a full object
   static async create(req, res) {
     try {
-      const { id } = await Meal.create(req.body);
-      const meal = await Meal.scope(['defaultScope', 'full'])
+      const data = req.body;
+      data.userId = req.user.id;
+      const { id } = await Meal.create(data);
+      const meal = await Meal.scope(['defaultScope', { method: ['full', req.user.id] }])
         .findByPk(id);
       return res.status(201)
         .json(meal);
@@ -31,7 +32,7 @@ class MealController {
     const { id } = req.params;
     try {
       await Meal.update(req.body, { where: { id } });
-      const meal = await Meal.scope(['defaultScope', 'full'])
+      const meal = await Meal.scope(['defaultScope', { method: ['full', req.user.id] }])
         .findByPk(id);
       return res.status(200)
         .json(meal);
@@ -43,7 +44,7 @@ class MealController {
 
   static async delete(req, res) {
     try {
-      await Meal.destroy({ where: { id: req.params.id } });
+      await Meal.destroy({ where: { id: req.params.id, userId: req.user.id } });
       return res.status(200)
         .json('meal removed');
     } catch (error) {
