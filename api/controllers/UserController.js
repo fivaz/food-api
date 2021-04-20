@@ -6,6 +6,7 @@ const { TOKEN_SECRET } = require('../helpers/vars');
 const { SALT_ROUNDS } = require('../helpers/vars');
 
 class UserController {
+  // TODO extends Controller
   static async getAll(req, res) {
     try {
       const users = await User.findAll();
