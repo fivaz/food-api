@@ -1,11 +1,12 @@
 const { Router } = require('express');
-const MealController = require('../controllers/MealController');
+const controller = require('../controllers/MealController');
 
 const router = Router();
 
-router.get('/meals', MealController.getAll);
-router.post('/meals', MealController.create);
-router.put('/meals/:id', MealController.update);
-router.delete('/meals/:id', MealController.delete);
+router.get('/meals', (req, res) => controller.getAll(req, res));
+router.get('/meals/:id', (req, res) => controller.get(req, res));
+router.post('/meals', (req, res) => controller.create(req, res));
+router.put('/meals/:id', (req, res) => controller.update(req, res));
+router.delete('/meals/:id', (req, res) => controller.delete(req, res));
 
 module.exports = router;

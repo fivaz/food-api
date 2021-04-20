@@ -1,13 +1,11 @@
 const request = require('supertest');
 const db = require('../api/models');
 const app = require('../index');
+const login = require('./authentification-mixin');
 
 const ingredientsURL = '/ingredients';
 const { Ingredient } = db;
-
-const getLatestIngredient = () => Ingredient.findOne({
-  order: [['createdAt', 'DESC']],
-});
+let user = null;
 
 async function createIngredient() {
   const { id } = await Ingredient.create({
@@ -16,41 +14,75 @@ async function createIngredient() {
     price: 5.55,
     unit: 'g',
     quantity: 5.5,
+    userId: 1,
   });
   return id;
 }
 
-afterAll(() => {
-  db.sequelize.close()
-    .then();
-});
-
 describe('Ingredient API', () => {
+  beforeAll(async () => {
+    user = await login(request(app));
+  });
+
   it('should show all ingredients', async () => {
-    const response = await request(app)
-      .get(ingredientsURL);
-    expect(response.statusCode)
+    const res = await request(app)
+      .get(ingredientsURL)
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.statusCode)
       .toBe(200);
 
-    expect(response.body)
-      .toHaveLength(await Ingredient.count());
+    const ingredientsModels = await Ingredient.scope(['defaultScope', { method: ['fromUser', user.id] }])
+      .findAll();
+
+    const ingredientsObjects = JSON.parse(JSON.stringify(ingredientsModels));
+
+    expect(res.body)
+      .toStrictEqual(ingredientsObjects);
+  });
+
+  it('should show all ingredients with quantities for a dish', async () => {
+    const dishId = 1;
+    const res = await request(app)
+      .get(ingredientsURL)
+      .query({ dishId })
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.statusCode)
+      .toBe(200);
+
+    const ingredientsModels = await Ingredient.scope(['defaultScope', { method: ['withDish', user.id, dishId] }])
+      .findAll();
+
+    const ingredientsObjects = JSON.parse(JSON.stringify(ingredientsModels));
+
+    expect(res.body)
+      .toStrictEqual(ingredientsObjects);
   });
 
   it('should show an ingredient', async () => {
     const id = 1;
-    const response = await request(app)
-      .get(`${ingredientsURL}/${id}`);
-    expect(response.statusCode)
+    const res = await request(app)
+      .get(`${ingredientsURL}/${id}`)
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.statusCode)
       .toEqual(200);
 
-    const ingredient = (await Ingredient.findByPk(id)).toJSON();
-    expect(response.body)
+    const ingredientModel = await Ingredient.scope(['defaultScope', { method: ['fromUser', user.id] }])
+      .findByPk(id);
+
+    const ingredient = ingredientModel.toJSON();
+
+    expect(res.body)
       .toEqual(ingredient);
   });
 
   it('shouldn\'t show an ingredient', async () => {
     const res = await request(app)
-      .get(`${ingredientsURL}/10000`);
+      .get(`${ingredientsURL}/10000`)
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(200);
 
@@ -67,18 +99,21 @@ describe('Ingredient API', () => {
         price: 3.25,
         unit: 'g',
         quantity: 200,
-      });
+      })
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(201);
 
-    const latestIngredient = (await getLatestIngredient()).toJSON();
+    const createdIngredientId = res.body.id;
 
-    const expectedIngredient = res.body;
-    delete expectedIngredient.createdAt;
-    delete expectedIngredient.updatedAt;
+    const ingredientModel = await Ingredient.scope(['defaultScope', { method: ['fromUser', user.id] }])
+      .findByPk(createdIngredientId);
 
-    expect(expectedIngredient)
-      .toEqual(latestIngredient);
+    const ingredientObject = ingredientModel.toJSON();
+
+    expect(res.body)
+      .toStrictEqual(ingredientObject);
   });
 
   it('should update a ingredient', async () => {
@@ -94,19 +129,28 @@ describe('Ingredient API', () => {
 
     const res = await request(app)
       .put(`${ingredientsURL}/${id}`)
-      .send(newIngredient);
+      .send(newIngredient)
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(200);
 
+    const ingredientModel = await Ingredient.scope(['defaultScope', { method: ['fromUser', user.id] }])
+      .findByPk(id);
+
+    const ingredient = ingredientModel.toJSON();
+
     expect(res.body)
-      .toEqual((await getLatestIngredient()).toJSON());
+      .toStrictEqual(ingredient);
   });
 
   it('should delete a ingredient', async () => {
     const id = await createIngredient();
 
     const res = await request(app)
-      .del(`${ingredientsURL}/${id}`);
+      .del(`${ingredientsURL}/${id}`)
+      .set('Authorization', `Bearer ${user.token}`);
+
     expect(res.statusCode)
       .toEqual(200);
 

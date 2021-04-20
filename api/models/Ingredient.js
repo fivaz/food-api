@@ -21,12 +21,15 @@ module.exports = (sequelize, DataTypes) => {
         as: 'dishIngredients',
       });
 
-      Ingredient.addScope('withDish', (dishId) => ({
+      Ingredient.addScope('fromUser', (userId) => ({ where: { userId } }));
+
+      Ingredient.addScope('withDish', (userId, dishId) => ({
+        where: { userId },
         include: {
           model: DishIngredient,
           as: 'dishIngredients',
           required: false,
-          where: { dishId: Number(dishId) },
+          where: { dishId },
         },
         raw: true,
         nest: true,

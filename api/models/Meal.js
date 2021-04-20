@@ -15,6 +15,8 @@ module.exports = (sequelize, DataTypes) => {
 
       Meal.belongsTo(User, { foreignKey: 'userId' });
 
+      Meal.addScope('fromUser', (userId) => ({ where: { userId } }));
+
       Meal.addScope('full', (userId) => ({
         where: { userId },
         include: {
