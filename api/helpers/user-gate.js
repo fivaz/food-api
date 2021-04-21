@@ -1,7 +1,5 @@
-const createError = require('http-errors');
+const forbidden = require('./NotAuthorizedError');
 const { User } = require('../models');
-
-const message = 'You are not authorized to access this ressource';
 
 class Policy {
   static checkRight(loggedUser, model) {
@@ -14,13 +12,13 @@ class Policy {
 
   static checkOwner(loggedUser, model) {
     if (loggedUser.id !== model.userId) {
-      throw createError(403, message);
+      throw forbidden;
     }
   }
 
   static checkIs(loggedUser, user) {
     if (loggedUser.id !== user.id) {
-      throw createError(403, message);
+      throw forbidden;
     }
   }
 }

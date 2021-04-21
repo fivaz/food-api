@@ -2,6 +2,7 @@ const request = require('supertest');
 const db = require('../api/models');
 const app = require('../index');
 const login = require('./authentification-mixin');
+const modelNotFound = require('../api/helpers/ModelNotFoundError');
 
 const ingredientsURL = '/ingredients';
 const { Ingredient } = db;
@@ -84,10 +85,10 @@ describe('Ingredient API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toEqual(404);
 
     expect(res.body)
-      .toBeNull();
+      .toBe(modelNotFound.message);
   });
 
   it('should create a new ingredient', async () => {

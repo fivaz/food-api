@@ -2,6 +2,7 @@ const request = require('supertest');
 const db = require('../api/models');
 const app = require('../index');
 const login = require('./authentification-mixin');
+const modelNotFound = require('../api/helpers/ModelNotFoundError');
 
 const mealsURL = '/meals';
 const { Meal } = db;
@@ -71,6 +72,18 @@ describe('Meal API', () => {
 
     expect(res.body)
       .toStrictEqual(mealObject);
+  });
+
+  it('shouldn\'t show a dish', async () => {
+    const res = await request(app)
+      .get(`${mealsURL}/10000`)
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.statusCode)
+      .toEqual(404);
+
+    expect(res.body)
+      .toBe(modelNotFound.message);
   });
 
   it('should show a meal with its dish', async () => {

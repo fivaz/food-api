@@ -1,6 +1,6 @@
 const autoBind = require('auto-bind');
-const createError = require('http-errors');
 const { checkRight } = require('../helpers/user-gate');
+const notFound = require('../helpers/ModelNotFoundError');
 
 class Controller {
   constructor() {
@@ -26,14 +26,22 @@ class Controller {
     return scope === 'full' ? this.findAllComplete(userId) : this.findAllSimple(userId);
   }
 
-  findComplete(id, userId) {
-    return this.model.scope(['defaultScope', { method: ['full', userId] }])
+  async findComplete(id, userId) {
+    const model = await this.model.scope(['defaultScope', { method: ['full', userId] }])
       .findByPk(id);
+    if (model) {
+      return model;
+    }
+    throw notFound;
   }
 
-  findSimple(id, userId) {
-    return this.model.scope(['defaultScope', { method: ['fromUser', userId] }])
+  async findSimple(id, userId) {
+    const model = await this.model.scope(['defaultScope', { method: ['fromUser', userId] }])
       .findByPk(id);
+    if (model) {
+      return model;
+    }
+    throw notFound;
   }
 
   find(id, userId, scope = 'simple') {
@@ -45,31 +53,28 @@ class Controller {
     if (model) {
       return model;
     }
-    throw createError(404, 'the resource does not exist');
+    throw notFound;
   }
 
   async getAll(req, res) {
     try {
       const models = await this.findAll(req.user.id, req.query?.scope);
-
       return res.status(200)
         .json(models);
     } catch (error) {
       return res.status(500)
-        .json(error);
+        .json(error.message);
     }
   }
 
-  // TODO check once the id doesnt exist
   async get(req, res) {
     try {
-      const models = await this.find(req.params.id, req.user.id, req.query?.scope);
-
+      const model = await this.find(req.params.id, req.user.id, req.query?.scope);
       return res.status(200)
-        .json(models);
+        .json(model);
     } catch (error) {
-      return res.status(500)
-        .json(error);
+      return res.status(error.status || 500)
+        .json(error.message);
     }
   }
 
@@ -84,7 +89,7 @@ class Controller {
         .json(meal);
     } catch (error) {
       return res.status(500)
-        .json(error);
+        .json(error.message);
     }
   }
 
@@ -102,7 +107,7 @@ class Controller {
         .json(meal);
     } catch (error) {
       return res.status(error.status || 500)
-        .json(error);
+        .json(error.message);
     }
   }
 
@@ -117,7 +122,7 @@ class Controller {
         .json('ressource removed');
     } catch (error) {
       return res.status(error.status || 500)
-        .json(error);
+        .json(error.message);
     }
   }
 }
