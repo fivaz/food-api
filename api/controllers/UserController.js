@@ -1,101 +1,80 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Controller = require('./Controller');
 const { User } = require('../models');
 
 const { TOKEN_SECRET } = require('../helpers/vars');
-const { SALT_ROUNDS } = require('../helpers/vars');
 
-class UserController {
-  // TODO extends Controller
-  static async getAll(req, res) {
-    try {
-      const users = await User.findAll();
-      return res.status(200)
-        .json(users);
-    } catch (error) {
-      return res.status(500)
-        .json(error.message);
-    }
-  }
+class UserController extends Controller {
+  // static async getAll(req, res) {
+  //   try {
+  //     const users = await User.findAll();
+  //     return res.status(200)
+  //       .json(users);
+  //   } catch (error) {
+  //     return res.status(500)
+  //       .json(error.message);
+  //   }
+  // }
+  //
+  // static async get(req, res) {
+  //   const { id } = req.params;
+  //   try {
+  //     const user = await User.findByPk(id);
+  //     return res.status(200)
+  //       .json(user);
+  //   } catch (error) {
+  //     return res.status(500)
+  //       .json(error.message);
+  //   }
+  // }
 
-  static async get(req, res) {
-    const { id } = req.params;
-    try {
-      const user = await User.findByPk(id);
-      return res.status(200)
-        .json(user);
-    } catch (error) {
-      return res.status(500)
-        .json(error.message);
-    }
+  static convertUser(userModel) {
+    const user = { ...userModel.toJSON(), password: undefined };
+    user.token = jwt.sign(user, TOKEN_SECRET);
+    return user;
   }
 
   static async login(req, res) {
     try {
-      const foundUser = await User.findOne({ where: { email: req.body.email } });
-      if (foundUser && await bcrypt.compare(req.body.password, foundUser.password)) {
-        const user = {
-          id: foundUser.id,
-          name: foundUser.name,
-          email: foundUser.email,
-        };
-        user.token = jwt.sign(user, TOKEN_SECRET);
+      const { password, email } = req.body;
+      const foundUser = await User.scope(null)
+        .findOne({ where: { email } });
+      if (foundUser && await foundUser.checkPassword(password)) {
         return res.status(200)
-          .json(user);
+          .json(UserController.convertUser(foundUser));
       }
       return res.status(401)
         .json('incorrect email or password');
     } catch (error) {
-      return res.status(500)
-        .json(error.message);
+      return res.status(error.status || 500)
+        .json(error.stack);
     }
   }
 
   static async register(req, res) {
     try {
-      const user = {
-        name: req.body.name,
-        email: req.body.email,
-        password: await bcrypt.hash(req.body.password, SALT_ROUNDS),
-      };
-      const createdUser = await User.create(user);
-      return res.status(201)
-        .json(createdUser);
+      const createdUser = await User.create(req.body);
+      return res.status(200)
+        .json(UserController.convertUser(createdUser));
     } catch (error) {
-      return res.status(500)
-        .json(error.message);
+      return res.status(error.status || 500)
+        .json(error.stack);
     }
   }
 
-  static async update(req, res) {
-    const { id } = req.params;
-    try {
-      const newUser = {
-        name: req.body.name,
-        email: req.body.email,
-        password: await bcrypt.hash(req.body.password, SALT_ROUNDS),
-      };
-      await User.update(newUser, { where: { id } });
-      const user = await User.findByPk(id);
-      return res.status(200)
-        .json(user);
-    } catch (error) {
-      return res.status(500)
-        .json(error.message);
-    }
-  }
-
-  static async delete(req, res) {
-    try {
-      const { id } = req.params;
-      await User.destroy({ where: { id } });
-      return res.status(200)
-        .json('user removed');
-    } catch (error) {
-      return res.status(500)
-        .json(error.message);
-    }
-  }
+  // static async update(req, res) {
+  //   const { id } = req.params;
+  //   try {
+  //     await User.update(req.body, { where: { id } });
+  //     const user = await User.findByPk(id);
+  //     return res.status(200)
+  //       .json(user);
+  //   } catch (error) {
+  //     return res.status(500)
+  //       .json(error.message);
+  //   }
+  // }
 }
 
 module.exports = UserController;
