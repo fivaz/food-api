@@ -1,3 +1,4 @@
+const autoBind = require('auto-bind');
 const createError = require('http-errors');
 const { checkRight } = require('../helpers/user-gate');
 
@@ -7,6 +8,7 @@ class Controller {
       throw new Error('Controller is abstract and cannot be instantiated!');
     }
     this.model = null;
+    autoBind(this);
   }
 
   // TODO check if I should merge both scopes into the same one

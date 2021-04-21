@@ -8,7 +8,8 @@
     "start": "node index.js",
     "test": "cross-env NODE_ENV=test PORT=0 jest",
     "pretest": "cross-env NODE_ENV=test npm run db:reset",
-    "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "db:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "db:recreate": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "db:reset:tables": "npx sequelize-cli db:seed:undo:all && npx sequelize-cli db:seed:all",
     "db:reset:data": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate"
   },
@@ -22,6 +23,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "auto-bind": "^4.0.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "consign": "^0.1.6",
