@@ -96,8 +96,8 @@ class Controller {
   async update(req, res) {
     const { id } = req.params;
     try {
-      const foundMeal = await this.findOrFail(id);
-      checkRight(req.user, foundMeal);
+      const foundModel = await this.findOrFail(id);
+      checkRight(req.user, foundModel);
 
       const data = { ...req.body, userId: req.user.id };
       await this.model.update(data, { where: { id } });
