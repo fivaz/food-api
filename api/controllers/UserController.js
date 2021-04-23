@@ -11,9 +11,13 @@ class UserController extends Controller {
     this.model = User;
   }
 
-  static convertUser(userObject) {
+  find(id) {
+    return this.model.findByPk(id);
+  }
+
+  static convertUser(userModel) {
     const user = {
-      ...userObject,
+      ...userModel.toJSON(),
       password: undefined,
     };
     user.token = jwt.sign(user, TOKEN_SECRET);
@@ -30,7 +34,7 @@ class UserController extends Controller {
         .findOne({ where: { email } });
       if (foundUser && await foundUser.checkPassword(password)) {
         return res.status(200)
-          .json(UserController.convertUser(foundUser.toJSON()));
+          .json(UserController.convertUser(foundUser));
       }
       return res.status(401)
         .json('incorrect email or password');
@@ -44,25 +48,22 @@ class UserController extends Controller {
     try {
       const createdUser = await this.model.create(req.body);
       return res.status(200)
-        .json(UserController.convertUser(createdUser.toJSON()));
+        .json(UserController.convertUser(createdUser));
     } catch (error) {
       return res.status(error.status || 500)
         .json(error.stack);
     }
   }
 
-  // TODO check what is the different between this update and Controller one
   async update(req, res) {
     const { id } = req.params;
     try {
       const foundModel = await this.findOrFail(id);
       checkRight(req.user, foundModel);
-      const data = {
-        ...req.body,
-        password: undefined,
-      };
-      await this.model.update(data, { where: { id } });
+
+      await this.model.update(req.body, { where: { id } });
       const model = await this.model.findByPk(id);
+
       return res.status(200)
         .json(UserController.convertUser(model));
     } catch (error) {

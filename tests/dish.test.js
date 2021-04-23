@@ -69,7 +69,7 @@ describe('Dish API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const dishModel = await Dish.scope(['defaultScope', { method: ['fromUser', user.id] }])
       .findByPk(id);
@@ -88,7 +88,7 @@ describe('Dish API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const dishModel = await Dish.scope(['defaultScope', { method: ['full', user.id] }])
       .findByPk(id);
@@ -105,7 +105,7 @@ describe('Dish API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(404);
+      .toBe(404);
 
     expect(res.body)
       .toBe(modelNotFound.message);
@@ -126,7 +126,7 @@ describe('Dish API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(201);
+      .toBe(201);
 
     const createdDishId = res.body.id;
 
@@ -155,7 +155,7 @@ describe('Dish API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(201);
+      .toBe(201);
 
     const createdDishId = res.body.id;
 
@@ -186,7 +186,7 @@ describe('Dish API', () => {
       .send(newDish)
       .set('Authorization', `Bearer ${user.token}`);
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const dishModel = await Dish.scope(['defaultScope', { method: ['fromUser', user.id] }])
       .findByPk(id);
@@ -216,7 +216,7 @@ describe('Dish API', () => {
       .send(newDish)
       .set('Authorization', `Bearer ${user.token}`);
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const dishModel = await Dish.scope(['defaultScope', { method: ['full', user.id] }])
       .findByPk(id);
@@ -235,7 +235,7 @@ describe('Dish API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const foundDish = await Dish.findByPk(id);
     expect(foundDish)

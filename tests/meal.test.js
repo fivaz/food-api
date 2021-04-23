@@ -64,7 +64,7 @@ describe('Meal API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const mealModel = await Meal.scope(['defaultScope', { method: ['fromUser', user.id] }]).findByPk(id);
 
@@ -80,7 +80,7 @@ describe('Meal API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(404);
+      .toBe(404);
 
     expect(res.body)
       .toBe(modelNotFound.message);
@@ -94,7 +94,7 @@ describe('Meal API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const mealModel = await Meal.scope(['defaultScope', { method: ['full', user.id] }]).findByPk(id);
 
@@ -114,7 +114,7 @@ describe('Meal API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(201);
+      .toBe(201);
 
     const createdMealId = res.body.id;
 
@@ -138,7 +138,7 @@ describe('Meal API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(201);
+      .toBe(201);
 
     const createdMealId = res.body.id;
 
@@ -163,7 +163,7 @@ describe('Meal API', () => {
       });
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const updatedMealId = res.body.id;
     const mealModel = await Meal.scope(['defaultScope', { method: ['fromUser', user.id] }])
@@ -187,7 +187,7 @@ describe('Meal API', () => {
       });
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const updatedMealId = res.body.id;
     const mealModel = await Meal.scope(['defaultScope', { method: ['full', user.id] }])
@@ -209,7 +209,7 @@ describe('Meal API', () => {
       });
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const updatedMealId = res.body.id;
     const mealModel = await Meal.scope(['defaultScope', { method: ['fromUser', user.id] }])
@@ -231,7 +231,7 @@ describe('Meal API', () => {
       });
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const updatedMealId = res.body.id;
     const updatedMealModel = await Meal.scope(['defaultScope', { method: ['fromUser', user.id] }])
@@ -250,7 +250,7 @@ describe('Meal API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const foundMeal = await Meal.findByPk(id);
     expect(foundMeal)

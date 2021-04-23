@@ -68,7 +68,7 @@ describe('Ingredient API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const ingredientModel = await Ingredient.scope(['defaultScope', { method: ['fromUser', user.id] }])
       .findByPk(id);
@@ -85,7 +85,7 @@ describe('Ingredient API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(404);
+      .toBe(404);
 
     expect(res.body)
       .toBe(modelNotFound.message);
@@ -104,7 +104,7 @@ describe('Ingredient API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(201);
+      .toBe(201);
 
     const createdIngredientId = res.body.id;
 
@@ -134,7 +134,7 @@ describe('Ingredient API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const ingredientModel = await Ingredient.scope(['defaultScope', { method: ['fromUser', user.id] }])
       .findByPk(id);
@@ -153,7 +153,7 @@ describe('Ingredient API', () => {
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(res.statusCode)
-      .toEqual(200);
+      .toBe(200);
 
     const foundIngredient = await Ingredient.findByPk(id);
     expect(foundIngredient)
