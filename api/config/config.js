@@ -6,11 +6,13 @@ module.exports = {
     host: '127.0.0.1',
     dialect: 'mysql',
     define: {
+      paranoid: true,
       defaultScope: {
         attributes: {
           exclude: [
             'createdAt',
             'updatedAt',
+            'deletedAt',
           ],
         },
       },
@@ -23,11 +25,13 @@ module.exports = {
     host: '127.0.0.1',
     dialect: 'mysql',
     define: {
+      paranoid: true,
       defaultScope: {
         attributes: {
           exclude: [
             'createdAt',
             'updatedAt',
+            'deletedAt',
           ],
         },
       },
@@ -41,11 +45,13 @@ module.exports = {
     port: process.env.DB_PORT || 3306,
     dialect: 'mysql',
     define: {
+      paranoid: true,
       defaultScope: {
         attributes: {
           exclude: [
             'createdAt',
             'updatedAt',
+            'deletedAt',
           ],
         },
       },
